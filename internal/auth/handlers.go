@@ -75,7 +75,7 @@ type APIKeyResponse struct {
 // @Param user body RegisterRequest true "User registration data"
 // @Success 201 {object} map[string]interface{} "User registered successfully"
 // @Failure 400 {object} map[string]interface{} "Invalid input"
-// @Router /auth/register [post]
+// @Router /../auth/register [post]
 func (ah *AuthHandlers) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -134,7 +134,7 @@ func (ah *AuthHandlers) Register(c *gin.Context) {
 // @Param credentials body LoginRequest true "User credentials"
 // @Success 200 {object} LoginResponse "Login successful"
 // @Failure 401 {object} map[string]interface{} "Invalid credentials"
-// @Router /auth/login [post]
+// @Router /../auth/login [post]
 func (ah *AuthHandlers) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -205,6 +205,14 @@ func (ah *AuthHandlers) RefreshToken(c *gin.Context) {
 }
 
 // GetProfile returns current user profile
+// @Summary Get user profile
+// @Description Get current user's profile information
+// @Tags user
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} UserInfo "User profile"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Router /../user/profile [get]
 func (ah *AuthHandlers) GetProfile(c *gin.Context) {
 	user, exists := GetCurrentUser(c)
 	if !exists {
@@ -235,7 +243,7 @@ func (ah *AuthHandlers) GetProfile(c *gin.Context) {
 // @Param apikey body APIKeyRequest true "API key data"
 // @Success 201 {object} APIKeyResponse "API key created successfully"
 // @Failure 401 {object} map[string]interface{} "Unauthorized"
-// @Router /user/api-keys [post]
+// @Router /../user/api-keys [post]
 func (ah *AuthHandlers) CreateAPIKey(c *gin.Context) {
 	var req APIKeyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -272,6 +280,14 @@ func (ah *AuthHandlers) CreateAPIKey(c *gin.Context) {
 }
 
 // ListAPIKeys lists user's API keys
+// @Summary List API keys
+// @Description Get all API keys for the current user
+// @Tags user
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{} "List of API keys"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Router /../user/api-keys [get]
 func (ah *AuthHandlers) ListAPIKeys(c *gin.Context) {
 	userID, exists := GetCurrentUserID(c)
 	if !exists {
@@ -306,6 +322,16 @@ func (ah *AuthHandlers) ListAPIKeys(c *gin.Context) {
 }
 
 // DeleteAPIKey deletes an API key
+// @Summary Delete API key
+// @Description Delete an API key by ID
+// @Tags user
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "API Key ID"
+// @Success 200 {object} map[string]interface{} "API key deleted successfully"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 404 {object} map[string]interface{} "API key not found"
+// @Router /../user/api-keys/{id} [delete]
 func (ah *AuthHandlers) DeleteAPIKey(c *gin.Context) {
 	keyID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -336,6 +362,17 @@ func (ah *AuthHandlers) DeleteAPIKey(c *gin.Context) {
 }
 
 // ListUsers lists all users (admin only)
+// @Summary List all users
+// @Description Get list of all users (admin only)
+// @Tags admin
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number" default(1)
+// @Param limit query int false "Items per page" default(10)
+// @Success 200 {object} map[string]interface{} "List of users"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Router /../admin/users [get]
 func (ah *AuthHandlers) ListUsers(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))

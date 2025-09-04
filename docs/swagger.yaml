@@ -67,6 +67,7 @@ definitions:
       usage_percent:
         type: number
     type: object
+host: localhost:5601
 info:
   contact:
     email: support@rclonestorage.local
@@ -80,7 +81,44 @@ info:
   title: RcloneStorage API
   version: 1.0.0
 paths:
-  /auth/login:
+  /../admin/users:
+    get:
+      description: Get list of all users (admin only)
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of users
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all users
+      tags:
+      - admin
+  /../auth/login:
     post:
       consumes:
       - application/json
@@ -107,7 +145,7 @@ paths:
       summary: User login
       tags:
       - authentication
-  /auth/register:
+  /../auth/register:
     post:
       consumes:
       - application/json
@@ -135,6 +173,107 @@ paths:
       summary: User registration
       tags:
       - authentication
+  /../user/api-keys:
+    get:
+      description: Get all API keys for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of API keys
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List API keys
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Create a new API key for the current user
+      parameters:
+      - description: API key data
+        in: body
+        name: apikey
+        required: true
+        schema:
+          $ref: '#/definitions/auth.APIKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: API key created successfully
+          schema:
+            $ref: '#/definitions/auth.APIKeyResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create API key
+      tags:
+      - user
+  /../user/api-keys/{id}:
+    delete:
+      description: Delete an API key by ID
+      parameters:
+      - description: API Key ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API key deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: API key not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete API key
+      tags:
+      - user
+  /../user/profile:
+    get:
+      description: Get current user's profile information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile
+          schema:
+            $ref: '#/definitions/auth.UserInfo'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - user
   /cache/clear:
     post:
       consumes:
@@ -525,35 +664,6 @@ paths:
       summary: Upload file
       tags:
       - files
-  /user/api-keys:
-    post:
-      consumes:
-      - application/json
-      description: Create a new API key for the current user
-      parameters:
-      - description: API key data
-        in: body
-        name: apikey
-        required: true
-        schema:
-          $ref: '#/definitions/auth.APIKeyRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: API key created successfully
-          schema:
-            $ref: '#/definitions/auth.APIKeyResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create API key
-      tags:
-      - user
 securityDefinitions:
   ApiKeyAuth:
     description: API Key for authentication

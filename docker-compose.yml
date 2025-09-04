@@ -2,7 +2,7 @@ services:
   rclonestorage:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.fixed
     container_name: rclonestorage
     ports:
       - "5601:5601"
