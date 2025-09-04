@@ -1,0 +1,22 @@
+# Example rclone configuration for multiple Mega accounts
+# Copy this file to rclone.conf and update with your actual credentials
+
+[mega1]
+type = mega
+user = your-email1@example.com
+pass = your-encrypted-password1
+
+[mega2]
+type = mega
+user = your-email2@example.com
+pass = your-encrypted-password2
+
+[mega3]
+type = mega
+user = your-email3@example.com
+pass = your-encrypted-password3
+
+# Union configuration to combine all mega accounts
+[union]
+type = union
+upstreams = mega1: mega2: mega3:

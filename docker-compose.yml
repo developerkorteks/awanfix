@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  rclonestorage:
+    build:
+      context: .
+      dockerfile: Dockerfile.fast
+    container_name: rclonestorage
+    ports:
+      - "5601:5601"
+    environment:
+      - API_PORT=5601
+      - API_HOST=0.0.0.0
+      - CACHE_DIR=/app/cache
+      - CACHE_TTL=24h
+      - CACHE_MAX_SIZE=10737418240
+      - RCLONE_CONFIG_PATH=/app/configs/rclone.conf
+      - RCLONE_BIN_PATH=rclone
+      - STORAGE_PROVIDERS=mega1,mega2,mega3
+      - UNION_NAME=union
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production-docker
+    volumes:
+      - ./configs/rclone.conf:/app/configs/rclone.conf:ro
+      - ./data:/app/data
+      - ./cache:/app/cache
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rclonestorage-network
+
+networks:
+  rclonestorage-network:
+    driver: bridge

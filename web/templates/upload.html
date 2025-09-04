@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload - RcloneStorage</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-cloud me-2"></i>RcloneStorage
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/files.html">Files</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/upload.html">Upload</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard.html">Monitoring</a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="userEmail">Loading...</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/profile.html">Profile</a></li>
+                            <li><a class="dropdown-item" href="/settings.html">Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="mb-4">Upload Files</h1>
+                
+                <!-- Storage Quota Info -->
+                <div class="dashboard-card mb-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="mb-1">Storage Usage</h6>
+                            <div class="progress mb-2">
+                                <div class="progress-bar" role="progressbar" id="quotaProgress" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted">
+                                <span id="storageInfo">Loading...</span>
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="text-muted">
+                                <i class="fas fa-server me-1"></i>
+                                4 Providers Active
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Zone -->
+                <div class="dashboard-card">
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-content">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt fa-4x"></i>
+                            </div>
+                            <h4>Drag & Drop Files Here</h4>
+                            <p class="mb-3">or <button type="button" class="btn btn-link p-0" onclick="document.getElementById('fileInput').click()">browse files</button></p>
+                            <div class="text-muted">
+                                <small>Supports all file types • Max file size: 5GB per file</small>
+                            </div>
+                        </div>
+                        <input type="file" id="fileInput" multiple hidden>
+                    </div>
+
+                    <!-- Upload Progress -->
+                    <div class="upload-progress" id="uploadProgress">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span id="uploadFileName">Uploading...</span>
+                            <span id="uploadPercent">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" id="uploadProgressBar" style="width: 0%"></div>
+                        </div>
+                        <div class="mt-2 text-muted">
+                            <small id="uploadStatus">Preparing upload...</small>
+                        </div>
+                    </div>
+
+                    <!-- Upload Queue -->
+                    <div id="uploadQueue" class="mt-4" style="display: none;">
+                        <h6>Upload Queue</h6>
+                        <div id="queueList"></div>
+                    </div>
+                </div>
+
+                <!-- Upload Tips -->
+                <div class="dashboard-card mt-4">
+                    <h6 class="mb-3">Upload Tips</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex mb-2">
+                                <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                <div>
+                                    <strong>Supported Formats</strong><br>
+                                    <small class="text-muted">All file types supported including videos, documents, images, and archives</small>
+                                </div>
+                            </div>
+                            <div class="d-flex mb-2">
+                                <i class="fas fa-video text-primary me-2 mt-1"></i>
+                                <div>
+                                    <strong>Video Streaming</strong><br>
+                                    <small class="text-muted">MP4, MKV, AVI files can be streamed directly</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex mb-2">
+                                <i class="fas fa-server text-info me-2 mt-1"></i>
+                                <div>
+                                    <strong>Multi-Provider Storage</strong><br>
+                                    <small class="text-muted">Files automatically distributed across Mega and Google Drive</small>
+                                </div>
+                            </div>
+                            <div class="d-flex mb-2">
+                                <i class="fas fa-shield-alt text-success me-2 mt-1"></i>
+                                <div>
+                                    <strong>Secure & Private</strong><br>
+                                    <small class="text-muted">Only you can access your uploaded files</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/filemanager.js"></script>
+    <script>
+        // Check authentication
+        if (!authManager.isAuthenticated()) {
+            window.location.href = '/login.html';
+        }
+
+        // Load user profile and update UI
+        async function loadUserProfile() {
+            try {
+                const result = await authManager.getProfile();
+                if (result.success) {
+                    const user = result.user;
+                    document.getElementById('userEmail').textContent = user.email;
+                    updateStorageInfo(user);
+                }
+            } catch (error) {
+                console.error('Failed to load user profile:', error);
+            }
+        }
+
+        function updateStorageInfo(user) {
+            const usagePercent = user.usage_percent || 0;
+            const quotaText = user.storage_quota === -1 ? 'Unlimited' : fileManager.formatFileSize(user.storage_quota);
+            const usedText = fileManager.formatFileSize(user.storage_used || 0);
+            
+            document.getElementById('quotaProgress').style.width = `${usagePercent}%`;
+            document.getElementById('storageInfo').textContent = `${usedText} of ${quotaText} used`;
+            
+            // Update progress bar color based on usage
+            const progressBar = document.getElementById('quotaProgress');
+            progressBar.className = 'progress-bar';
+            if (usagePercent > 90) {
+                progressBar.classList.add('bg-danger');
+            } else if (usagePercent > 75) {
+                progressBar.classList.add('bg-warning');
+            } else {
+                progressBar.classList.add('bg-success');
+            }
+        }
+
+        // Upload functionality
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadProgress = document.getElementById('uploadProgress');
+
+        // Drag and drop handlers
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+
+        // File input handler
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        });
+
+        // Handle file uploads
+        async function handleFiles(files) {
+            if (files.length === 0) return;
+
+            for (const file of files) {
+                await uploadFile(file);
+            }
+        }
+
+        async function uploadFile(file) {
+            try {
+                // Show progress
+                uploadProgress.style.display = 'block';
+                document.getElementById('uploadFileName').textContent = file.name;
+                document.getElementById('uploadStatus').textContent = 'Uploading to cloud storage...';
+
+                const result = await fileManager.uploadFile(file, (progress) => {
+                    document.getElementById('uploadPercent').textContent = `${Math.round(progress)}%`;
+                    document.getElementById('uploadProgressBar').style.width = `${progress}%`;
+                });
+
+                // Success
+                document.getElementById('uploadStatus').textContent = 'Upload completed successfully!';
+                document.getElementById('uploadProgressBar').classList.remove('progress-bar-animated');
+                document.getElementById('uploadProgressBar').classList.add('bg-success');
+
+                // Hide progress after delay
+                setTimeout(() => {
+                    uploadProgress.style.display = 'none';
+                    document.getElementById('uploadProgressBar').classList.add('progress-bar-animated');
+                    document.getElementById('uploadProgressBar').classList.remove('bg-success');
+                    document.getElementById('uploadProgressBar').style.width = '0%';
+                    
+                    // Reload user profile to update storage info
+                    loadUserProfile();
+                }, 2000);
+
+                // Show success message
+                showAlert(`File "${file.name}" uploaded successfully!`, 'success');
+
+            } catch (error) {
+                // Error
+                document.getElementById('uploadStatus').textContent = `Upload failed: ${error.message}`;
+                document.getElementById('uploadProgressBar').classList.remove('progress-bar-animated');
+                document.getElementById('uploadProgressBar').classList.add('bg-danger');
+                
+                showAlert(`Upload failed: ${error.message}`, 'danger');
+            }
+        }
+
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alert.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 5000);
+        }
+
+        function logout() {
+            authManager.logout();
+        }
+
+        // Initialize page
+        loadUserProfile();
+    </script>
+</body>
+</html>

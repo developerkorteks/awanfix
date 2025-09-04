@@ -1,0 +1,47 @@
+# Fast Dockerfile using pre-built binary
+FROM alpine:latest
+
+# Install runtime dependencies only
+RUN apk add --no-cache \
+    ca-certificates \
+    curl \
+    sqlite \
+    rclone \
+    tzdata \
+    bash
+
+# Create app user
+RUN addgroup -g 1001 appgroup && \
+    adduser -u 1001 -G appgroup -s /bin/sh -D appuser
+
+# Set working directory
+WORKDIR /app
+
+# Copy pre-built binary
+COPY bin/rclonestorage ./rclonestorage
+
+# Copy application files
+COPY web ./web
+COPY configs ./configs
+COPY .env.example ./.env
+
+# Update port in env file
+RUN sed -i 's/API_PORT=8080/API_PORT=5601/' .env
+
+# Create necessary directories with proper permissions
+RUN mkdir -p cache/{files,metadata,temp} data logs && \
+    chown -R appuser:appgroup /app && \
+    chmod +x ./rclonestorage
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
+EXPOSE 5601
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:5601/health || exit 1
+
+# Start the application
+CMD ["./rclonestorage"]

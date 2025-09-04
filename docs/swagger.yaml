@@ -1,0 +1,569 @@
+basePath: /api/v1
+definitions:
+  internal_auth.APIKeyRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  internal_auth.APIKeyResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+    type: object
+  internal_auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  internal_auth.LoginResponse:
+    properties:
+      expires_at:
+        type: string
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/internal_auth.UserInfo'
+    type: object
+  internal_auth.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      role:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  internal_auth.UserInfo:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+      storage_quota:
+        type: integer
+      storage_used:
+        type: integer
+      usage_percent:
+        type: number
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@rclonestorage.local
+    name: RcloneStorage API Support
+  description: Cloud Storage API using Rclone with multiple providers support, authentication,
+    and video streaming capabilities.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: RcloneStorage API
+  version: 1.0.0
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and get JWT token
+      parameters:
+      - description: User credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: '#/definitions/internal_auth.LoginResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User login
+      tags:
+      - authentication
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user account
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User registration
+      tags:
+      - authentication
+  /cache/clear:
+    post:
+      consumes:
+      - application/json
+      description: Clear system cache (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cache cleared successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Clear cache
+      tags:
+      - system
+  /download/{id}:
+    get:
+      description: Download a file from storage with caching support
+      parameters:
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: File content
+          schema:
+            type: file
+        "404":
+          description: File not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Download file
+      tags:
+      - files
+  /files:
+    get:
+      consumes:
+      - application/json
+      description: Get list of files with optional filtering and pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of files
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List files
+      tags:
+      - files
+  /files/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a file from cloud storage (requires ownership or admin)
+      parameters:
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - not file owner
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: File not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Delete file
+      tags:
+      - files
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific file
+      parameters:
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File information
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: File not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get file info
+      tags:
+      - files
+  /monitoring/realtime:
+    get:
+      consumes:
+      - application/json
+      description: Get real-time system statistics for monitoring dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Real-time statistics
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Get real-time statistics
+      tags:
+      - monitoring
+  /monitoring/system:
+    get:
+      consumes:
+      - application/json
+      description: Get comprehensive system statistics including storage, cache, and
+        performance
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: System statistics
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Get system statistics
+      tags:
+      - monitoring
+  /public/monitoring:
+    get:
+      consumes:
+      - application/json
+      description: Get limited public monitoring data (no authentication required)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Public monitoring data
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get public monitoring data
+      tags:
+      - public
+  /public/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get public system statistics (no authentication required)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Public statistics
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get public statistics
+      tags:
+      - public
+  /stats:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed system statistics including storage, cache, and system
+        info (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: System statistics
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Get system statistics
+      tags:
+      - system
+  /stream/{id}:
+    get:
+      description: Stream video file with range support for progressive loading
+      parameters:
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Range header for partial content
+        in: header
+        name: Range
+        type: string
+      produces:
+      - video/*
+      responses:
+        "200":
+          description: Video stream
+          schema:
+            type: file
+        "206":
+          description: Partial content
+          schema:
+            type: file
+        "404":
+          description: File not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Stream video file
+      tags:
+      - streaming
+  /stream/{id}/info:
+    get:
+      consumes:
+      - application/json
+      description: Get video stream information including duration, bitrate, resolution
+      parameters:
+      - description: File ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Stream information
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: File not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get stream info
+      tags:
+      - streaming
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file to cloud storage with authentication and ownership
+        tracking
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: File description
+        in: formData
+        name: description
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File uploaded successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad request - no file uploaded
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - upload permission denied or quota exceeded
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Upload file
+      tags:
+      - files
+  /user/api-keys:
+    post:
+      consumes:
+      - application/json
+      description: Create a new API key for the current user
+      parameters:
+      - description: API key data
+        in: body
+        name: apikey
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth.APIKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: API key created successfully
+          schema:
+            $ref: '#/definitions/internal_auth.APIKeyResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create API key
+      tags:
+      - user
+securityDefinitions:
+  ApiKeyAuth:
+    description: API Key for authentication
+    in: header
+    name: X-API-Key
+    type: apiKey
+  BearerAuth:
+    description: 'JWT token. Format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - RcloneStorage</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <h2>RcloneStorage</h2>
+                <p class="text-muted">Create your account</p>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <form id="registerForm">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" required>
+                    <div class="form-text">
+                        Password must be at least 8 characters with uppercase, lowercase, digit, and special character.
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" id="confirmPassword" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100" id="registerBtn">
+                    <span class="btn-text">Create Account</span>
+                    <span class="spinner d-none"></span>
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <p class="mb-0">Already have an account? <a href="/login.html">Sign in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script>
+        // Check if already logged in
+        if (authManager.isAuthenticated()) {
+            window.location.href = '/';
+        }
+
+        // Register form handler
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const registerBtn = document.getElementById('registerBtn');
+            const btnText = registerBtn.querySelector('.btn-text');
+            const spinner = registerBtn.querySelector('.spinner');
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                showAlert('Passwords do not match', 'danger');
+                return;
+            }
+            
+            // Show loading state
+            registerBtn.disabled = true;
+            btnText.textContent = 'Creating account...';
+            spinner.classList.remove('d-none');
+            
+            try {
+                const result = await authManager.register(email, password);
+                
+                if (result.success) {
+                    showAlert('Account created successfully! Please sign in.', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 2000);
+                } else {
+                    showAlert(result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', 'danger');
+            } finally {
+                // Reset button state
+                registerBtn.disabled = false;
+                btnText.textContent = 'Create Account';
+                spinner.classList.add('d-none');
+            }
+        });
+
+        // Show alert function
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+        }
+    </script>
+</body>
+</html>
