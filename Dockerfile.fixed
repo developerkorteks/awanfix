@@ -31,9 +31,9 @@ RUN apk add --no-cache \
     tzdata \
     bash
 
-# Create app user
-RUN addgroup -g 1001 appgroup && \
-    adduser -u 1001 -G appgroup -s /bin/sh -D appuser
+# Create app user with same UID as host
+RUN addgroup -g 1000 appgroup && \
+    adduser -u 1000 -G appgroup -s /bin/sh -D appuser
 
 # Set working directory
 WORKDIR /app
@@ -52,7 +52,8 @@ RUN sed -i 's/API_PORT=8080/API_PORT=5601/' .env
 # Create necessary directories with proper permissions
 RUN mkdir -p cache/{files,metadata,temp} data logs && \
     chown -R appuser:appgroup /app && \
-    chmod +x ./rclonestorage
+    chmod +x ./rclonestorage && \
+    chmod -R 755 /app/cache /app/data /app/logs
 
 # Switch to non-root user
 USER appuser

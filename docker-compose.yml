@@ -21,9 +21,9 @@ services:
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production-docker
     volumes:
       - ./configs/rclone.conf:/app/configs/rclone.conf:ro
-      - ./data:/app/data
-      - ./cache:/app/cache
-      - ./logs:/app/logs
+      - ./data:/app/data:Z
+      - ./cache:/app/cache:Z
+      - ./logs:/app/logs:Z
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5601/health"]

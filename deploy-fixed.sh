@@ -111,6 +111,15 @@ docker-compose build --no-cache
 print_step "7. Starting containers..."
 docker-compose up -d
 
+# Step 7.5: Fix permission issues
+print_step "7.5. Fixing permission issues..."
+sleep 5  # Wait for container to start
+if docker-compose exec --user root rclonestorage chown -R appuser:appgroup /app/cache /app/data /app/logs 2>/dev/null; then
+    print_status "✅ Permissions fixed successfully"
+else
+    print_warning "⚠️  Could not fix permissions automatically"
+fi
+
 # Step 8: Wait for service to be ready
 print_step "8. Waiting for service to be ready..."
 echo -n "Waiting for RcloneStorage to start"
@@ -149,6 +158,30 @@ if curl -s http://localhost:5601/api/auth/register > /dev/null 2>&1; then
 else
     print_warning "Auth routes may need configuration"
 fi
+
+# Test upload functionality
+print_status "Testing upload functionality..."
+echo "test upload" > /tmp/deploy_test.txt
+LOGIN_RESPONSE=$(curl -s -X POST http://localhost:5601/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"email":"admin@rclonestorage.local","password":"Admin123!"}')
+
+if echo "$LOGIN_RESPONSE" | grep -q '"token"'; then
+    TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.token')
+    UPLOAD_RESPONSE=$(curl -s -X POST http://localhost:5601/api/v1/upload \
+        -H "Authorization: Bearer $TOKEN" \
+        -F "file=@/tmp/deploy_test.txt")
+    
+    if echo "$UPLOAD_RESPONSE" | grep -q '"uploaded_to_cloud"'; then
+        print_status "✅ Upload functionality working"
+    else
+        print_warning "⚠️  Upload test failed - check permissions"
+    fi
+else
+    print_warning "⚠️  Could not test upload - login failed"
+fi
+
+rm -f /tmp/deploy_test.txt
 
 # Step 10: Display deployment information
 echo ""
