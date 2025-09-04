@@ -1,13 +1,13 @@
 basePath: /api/v1
 definitions:
-  internal_auth.APIKeyRequest:
+  auth.APIKeyRequest:
     properties:
       name:
         type: string
     required:
     - name
     type: object
-  internal_auth.APIKeyResponse:
+  auth.APIKeyResponse:
     properties:
       created_at:
         type: string
@@ -18,7 +18,7 @@ definitions:
       name:
         type: string
     type: object
-  internal_auth.LoginRequest:
+  auth.LoginRequest:
     properties:
       email:
         type: string
@@ -28,16 +28,16 @@ definitions:
     - email
     - password
     type: object
-  internal_auth.LoginResponse:
+  auth.LoginResponse:
     properties:
       expires_at:
         type: string
       token:
         type: string
       user:
-        $ref: '#/definitions/internal_auth.UserInfo'
+        $ref: '#/definitions/auth.UserInfo'
     type: object
-  internal_auth.RegisterRequest:
+  auth.RegisterRequest:
     properties:
       email:
         type: string
@@ -50,7 +50,7 @@ definitions:
     - email
     - password
     type: object
-  internal_auth.UserInfo:
+  auth.UserInfo:
     properties:
       created_at:
         type: string
@@ -67,7 +67,6 @@ definitions:
       usage_percent:
         type: number
     type: object
-host: localhost:8080
 info:
   contact:
     email: support@rclonestorage.local
@@ -92,14 +91,14 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.LoginRequest'
+          $ref: '#/definitions/auth.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Login successful
           schema:
-            $ref: '#/definitions/internal_auth.LoginResponse'
+            $ref: '#/definitions/auth.LoginResponse'
         "401":
           description: Invalid credentials
           schema:
@@ -119,7 +118,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.RegisterRequest'
+          $ref: '#/definitions/auth.RegisterRequest'
       produces:
       - application/json
       responses:
@@ -537,14 +536,14 @@ paths:
         name: apikey
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.APIKeyRequest'
+          $ref: '#/definitions/auth.APIKeyRequest'
       produces:
       - application/json
       responses:
         "201":
           description: API key created successfully
           schema:
-            $ref: '#/definitions/internal_auth.APIKeyResponse'
+            $ref: '#/definitions/auth.APIKeyResponse'
         "401":
           description: Unauthorized
           schema:

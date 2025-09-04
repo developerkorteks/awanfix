@@ -60,8 +60,6 @@ print_status "✅ Directories created"
 print_step "3. Setting up environment configuration..."
 if [ ! -f ".env" ]; then
     cp .env.example .env
-    # Update port to 5601
-    sed -i 's/API_PORT=8080/API_PORT=5601/' .env
     print_status "✅ Created .env file with port 5601"
 else
     print_warning ".env file already exists, updating port..."

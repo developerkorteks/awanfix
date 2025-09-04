@@ -48,7 +48,8 @@ COPY --from=builder /app/.env.example ./.env
 
 # Create necessary directories with proper permissions
 RUN mkdir -p cache/{files,metadata,temp} data logs && \
-    chown -R appuser:appgroup /app
+    chown -R appuser:appgroup /app && \
+    chmod +x ./rclonestorage
 
 # Switch to non-root user
 USER appuser

@@ -43,7 +43,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.LoginRequest"
+                            "$ref": "#/definitions/auth.LoginRequest"
                         }
                     }
                 ],
@@ -51,7 +51,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Login successful",
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.LoginResponse"
+                            "$ref": "#/definitions/auth.LoginResponse"
                         }
                     },
                     "401": {
@@ -84,7 +84,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.RegisterRequest"
+                            "$ref": "#/definitions/auth.RegisterRequest"
                         }
                     }
                 ],
@@ -722,7 +722,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.APIKeyRequest"
+                            "$ref": "#/definitions/auth.APIKeyRequest"
                         }
                     }
                 ],
@@ -730,7 +730,7 @@ const docTemplate = `{
                     "201": {
                         "description": "API key created successfully",
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.APIKeyResponse"
+                            "$ref": "#/definitions/auth.APIKeyResponse"
                         }
                     },
                     "401": {
@@ -745,7 +745,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "internal_auth.APIKeyRequest": {
+        "auth.APIKeyRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -756,7 +756,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_auth.APIKeyResponse": {
+        "auth.APIKeyResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -773,7 +773,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_auth.LoginRequest": {
+        "auth.LoginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -788,7 +788,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_auth.LoginResponse": {
+        "auth.LoginResponse": {
             "type": "object",
             "properties": {
                 "expires_at": {
@@ -798,11 +798,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/internal_auth.UserInfo"
+                    "$ref": "#/definitions/auth.UserInfo"
                 }
             }
         },
-        "internal_auth.RegisterRequest": {
+        "auth.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -821,7 +821,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_auth.UserInfo": {
+        "auth.UserInfo": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -867,7 +867,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "RcloneStorage API",

@@ -9,7 +9,7 @@
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT
 
-// @host localhost:8080
+// @host
 // @BasePath /api/v1
 
 // @securityDefinitions.apikey BearerAuth
@@ -30,13 +30,13 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/nabilulilalbab/rclonestorage/docs"
 	"github.com/nabilulilalbab/rclonestorage/internal/api"
 	"github.com/nabilulilalbab/rclonestorage/internal/auth"
 	"github.com/nabilulilalbab/rclonestorage/internal/config"
 	"github.com/nabilulilalbab/rclonestorage/internal/monitoring"
-	_ "github.com/nabilulilalbab/rclonestorage/docs"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -106,7 +106,7 @@ func main() {
 	// Health check endpoint (public)
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
+			"status":  "ok",
 			"service": "rclonestorage",
 			"version": "1.0.0",
 			"features": []string{
@@ -128,7 +128,7 @@ func main() {
 	// Start server
 	port := cfg.Server.Port
 	if port == "" {
-		port = "8080"
+		port = "5601"
 	}
 
 	log.Printf("Starting RcloneStorage server on port %s", port)

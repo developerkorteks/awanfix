@@ -51,7 +51,7 @@ swagger-serve:
 		swagger serve docs/swagger.yaml -p 8081; \
 	else \
 		echo "Swagger CLI not installed. Install with: npm install -g swagger"; \
-		echo "Or access Swagger UI at http://localhost:8080/swagger/index.html when server is running"; \
+		echo "Or access Swagger UI at http://localhost:5601/swagger/index.html when server is running"; \
 	fi
 
 # Build the application
@@ -119,13 +119,13 @@ dirs:
 test-upload:
 	@echo "Testing file upload..."
 	echo "Hello, RcloneStorage!" > /tmp/test.txt
-	curl -X POST -F "file=@/tmp/test.txt" http://localhost:8080/api/v1/upload
+	curl -X POST -F "file=@/tmp/test.txt" http://localhost:5601/api/v1/upload
 	rm /tmp/test.txt
 
 # Show server status
 status:
 	@echo "Checking server status..."
-	curl -s http://localhost:8080/health | jq . || echo "Server not running or jq not installed"
+	curl -s http://localhost:5601/health | jq . || echo "Server not running or jq not installed"
 
 # Show API endpoints
 endpoints:

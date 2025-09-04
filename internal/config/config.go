@@ -6,10 +6,10 @@ import (
 )
 
 type Config struct {
-	Server   ServerConfig
-	Cache    CacheConfig
-	Rclone   RcloneConfig
-	Storage  StorageConfig
+	Server  ServerConfig
+	Cache   CacheConfig
+	Rclone  RcloneConfig
+	Storage StorageConfig
 }
 
 type ServerConfig struct {
@@ -18,8 +18,8 @@ type ServerConfig struct {
 }
 
 type CacheConfig struct {
-	Dir string
-	TTL time.Duration
+	Dir     string
+	TTL     time.Duration
 	MaxSize int64 // in bytes
 }
 
@@ -36,7 +36,7 @@ type StorageConfig struct {
 func Load() (*Config, error) {
 	cfg := &Config{
 		Server: ServerConfig{
-			Port: getEnv("API_PORT", "8080"),
+			Port: getEnv("API_PORT", "5601"),
 			Host: getEnv("API_HOST", "0.0.0.0"),
 		},
 		Cache: CacheConfig{
@@ -50,7 +50,7 @@ func Load() (*Config, error) {
 		},
 		Storage: StorageConfig{
 			Providers: []string{"mega1", "mega2", "mega3", "gdrive"}, // Three mega + Google Drive
-			UnionName: "union", // Use union for load balancing
+			UnionName: "union",                                       // Use union for load balancing
 		},
 	}
 
