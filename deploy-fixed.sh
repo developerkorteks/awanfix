@@ -114,7 +114,11 @@ docker-compose up -d
 # Step 7.5: Fix permission issues
 print_step "7.5. Fixing permission issues..."
 sleep 5  # Wait for container to start
-if docker-compose exec --user root rclonestorage chown -R appuser:appgroup /app/cache /app/data /app/logs 2>/dev/null; then
+if docker-compose exec --user root rclonestorage sh -c "
+    chown -R appuser:appgroup /app/cache /app/data /app/logs && 
+    chmod -R 755 /app/cache /app/data /app/logs && 
+    chmod 664 /app/data/auth.db 2>/dev/null || true
+" 2>/dev/null; then
     print_status "✅ Permissions fixed successfully"
 else
     print_warning "⚠️  Could not fix permissions automatically"

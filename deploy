@@ -93,7 +93,11 @@ docker-compose up -d --build
 # Fix permissions
 print_step "5. Fixing permissions..."
 sleep 10  # Wait for container to start
-docker-compose exec --user root rclonestorage chown -R appuser:appgroup /app/cache /app/data /app/logs 2>/dev/null || print_warning "Could not fix permissions automatically"
+docker-compose exec --user root rclonestorage sh -c "
+    chown -R appuser:appgroup /app/cache /app/data /app/logs && 
+    chmod -R 755 /app/cache /app/data /app/logs && 
+    chmod 664 /app/data/auth.db 2>/dev/null || true
+" 2>/dev/null || print_warning "Could not fix permissions automatically"
 
 # Wait for service
 print_step "6. Waiting for service to be ready..."
