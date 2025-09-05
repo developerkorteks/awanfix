@@ -17,10 +17,6 @@ class ProfilePage {
             return;
         }
 
-        // Initialize modals
-        this.createApiKeyModal = new bootstrap.Modal(document.getElementById('createApiKeyModal'));
-        this.apiKeyCreatedModal = new bootstrap.Modal(document.getElementById('apiKeyCreatedModal'));
-
         // Load data
         await this.loadUserProfile();
         await this.loadApiKeys();
@@ -222,7 +218,7 @@ class ProfilePage {
 
     showCreateApiKeyModal() {
         document.getElementById('apiKeyName').value = '';
-        this.createApiKeyModal.show();
+        document.getElementById('createApiKeyModal').classList.remove('hidden');
     }
 
     async createApiKey() {
@@ -240,8 +236,8 @@ class ProfilePage {
             document.getElementById('newApiKey').value = result.key;
             document.getElementById('apiKeyExample').textContent = result.key;
             
-            this.createApiKeyModal.hide();
-            this.apiKeyCreatedModal.show();
+            document.getElementById('createApiKeyModal').classList.add('hidden');
+            document.getElementById('apiKeyCreatedModal').classList.remove('hidden');
             
             // Reload API keys list
             await this.loadApiKeys();
@@ -292,18 +288,35 @@ class ProfilePage {
     }
 
     showAlert(message, type) {
+        const alertColors = {
+            success: 'bg-green-50 border-green-200 text-green-800',
+            danger: 'bg-red-50 border-red-200 text-red-800',
+            warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+            info: 'bg-blue-50 border-blue-200 text-blue-800'
+        };
+        
+        const alertIcons = {
+            success: 'fas fa-check-circle',
+            danger: 'fas fa-exclamation-circle',
+            warning: 'fas fa-exclamation-triangle',
+            info: 'fas fa-info-circle'
+        };
+        
         const alert = document.createElement('div');
-        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        alert.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        alert.className = `fixed top-4 right-4 z-50 ${alertColors[type]} border rounded-lg p-4 flex items-center shadow-lg min-w-80`;
         alert.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <i class="${alertIcons[type]} mr-3"></i>
+            <span class="flex-1">${message}</span>
+            <button type="button" class="ml-3 text-current hover:opacity-70 transition-opacity" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
         `;
+        
         document.body.appendChild(alert);
         
         setTimeout(() => {
             if (alert.parentNode) {
-                alert.parentNode.removeChild(alert);
+                alert.remove();
             }
         }, 5000);
     }
@@ -315,15 +328,29 @@ function logout() {
 }
 
 function showCreateApiKeyModal() {
-    profilePage.showCreateApiKeyModal();
+    if (profilePage) {
+        profilePage.showCreateApiKeyModal();
+    }
+}
+
+function closeCreateApiKeyModal() {
+    document.getElementById('createApiKeyModal').classList.add('hidden');
+}
+
+function closeApiKeyCreatedModal() {
+    document.getElementById('apiKeyCreatedModal').classList.add('hidden');
 }
 
 function createApiKey() {
-    profilePage.createApiKey();
+    if (profilePage) {
+        profilePage.createApiKey();
+    }
 }
 
 function copyApiKey() {
-    profilePage.copyApiKey();
+    if (profilePage) {
+        profilePage.copyApiKey();
+    }
 }
 
 // Initialize profile page

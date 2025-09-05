@@ -86,6 +86,8 @@ func main() {
 	r.StaticFile("/stream.html", "./web/templates/stream.html")
 	r.StaticFile("/profile.html", "./web/templates/profile.html")
 	r.StaticFile("/dashboard.html", "./web/templates/dashboard.html")
+	r.StaticFile("/settings.html", "./web/templates/settings.html")
+	r.StaticFile("/admin.html", "./web/templates/admin.html")
 
 	// Setup authentication routes
 	authManager.SetupAuthRoutes(r)

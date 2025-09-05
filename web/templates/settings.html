@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - RcloneStorage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#6b7280',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b',
+                        info: '#06b6d4'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-2 text-xl font-bold text-gray-900 hover:text-primary transition-colors">
+                        <i class="fas fa-cloud text-primary text-2xl"></i>
+                        <span>RcloneStorage</span>
+                    </a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="/" class="text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="/files.html" class="text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-folder mr-2"></i>Files
+                    </a>
+                    <a href="/upload.html" class="text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-upload mr-2"></i>Upload
+                    </a>
+                    <a href="/dashboard.html" class="text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-chart-line mr-2"></i>Monitoring
+                    </a>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="relative">
+                    <button id="userMenuButton" class="flex items-center space-x-2 text-gray-700 hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-user"></i>
+                        <span id="userEmail" class="hidden sm:inline">Loading...</span>
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                        <a href="/profile.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors">
+                            <i class="fas fa-user mr-2"></i>Profile
+                        </a>
+                        <a href="/settings.html" class="block px-4 py-2 text-primary bg-blue-50 font-medium">
+                            <i class="fas fa-cog mr-2"></i>Settings
+                        </a>
+                        <a href="/admin.html" id="adminMenuItem" class="hidden block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors">
+                            <i class="fas fa-shield-alt mr-2"></i>Admin Panel
+                        </a>
+                        <hr class="border-gray-200">
+                        <a href="#" onclick="logout()" class="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobileMenuButton" class="text-gray-600 hover:text-primary transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <div id="mobileMenu" class="hidden md:hidden pb-4">
+                <div class="space-y-2">
+                    <a href="/" class="block text-gray-600 hover:text-primary hover:bg-gray-100 px-3 py-2 rounded-md transition-colors">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="/files.html" class="block text-gray-600 hover:text-primary hover:bg-gray-100 px-3 py-2 rounded-md transition-colors">
+                        <i class="fas fa-folder mr-2"></i>Files
+                    </a>
+                    <a href="/upload.html" class="block text-gray-600 hover:text-primary hover:bg-gray-100 px-3 py-2 rounded-md transition-colors">
+                        <i class="fas fa-upload mr-2"></i>Upload
+                    </a>
+                    <a href="/dashboard.html" class="block text-gray-600 hover:text-primary hover:bg-gray-100 px-3 py-2 rounded-md transition-colors">
+                        <i class="fas fa-chart-line mr-2"></i>Monitoring
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-cog text-primary mr-3"></i>
+                Settings
+            </h1>
+            <p class="text-gray-600 mt-2">Configure your RcloneStorage preferences</p>
+        </div>
+
+        <!-- Settings Sections -->
+        <div class="space-y-8">
+            <!-- Account Settings -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-primary to-blue-600 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-white flex items-center">
+                        <i class="fas fa-user-cog mr-2"></i>
+                        Account Settings
+                    </h2>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <input type="email" id="email" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                        <p class="text-sm text-gray-600 mt-2">Contact admin to change email address</p>
+                    </div>
+                    
+                    <div>
+                        <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                        <input type="password" id="currentPassword" placeholder="Enter current password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                    </div>
+                    
+                    <div>
+                        <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                        <input type="password" id="newPassword" placeholder="Enter new password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                    </div>
+                    
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                    </div>
+                    
+                    <button onclick="changePassword()" class="bg-primary hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center">
+                        <i class="fas fa-key mr-2"></i>Change Password
+                    </button>
+                </div>
+            </div>
+
+            <!-- Storage Settings -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-success to-emerald-600 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-white flex items-center">
+                        <i class="fas fa-hdd mr-2"></i>
+                        Storage Settings
+                    </h2>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Storage Quota</label>
+                        <div class="flex justify-between items-center mb-2">
+                            <span id="storageUsed" class="text-sm font-medium text-gray-900">0 MB</span>
+                            <span id="storageQuota" class="text-sm font-medium text-gray-900">Unlimited</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="storageProgress" class="bg-gradient-to-r from-success to-emerald-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="defaultProvider" class="block text-sm font-medium text-gray-700 mb-2">Default Storage Provider</label>
+                        <select id="defaultProvider" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                            <option value="union">Union (Load Balanced)</option>
+                            <option value="mega1">Mega Account 1</option>
+                            <option value="mega2">Mega Account 2</option>
+                            <option value="mega3">Mega Account 3</option>
+                            <option value="gdrive">Google Drive</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="autoCleanup" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Auto-cleanup temporary files</span>
+                        </label>
+                        <p class="text-sm text-gray-600 mt-2 ml-6">Automatically delete temporary files after 24 hours</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy & Security -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-warning to-yellow-600 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-white flex items-center">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        Privacy & Security
+                    </h2>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="twoFactor" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Enable Two-Factor Authentication</span>
+                        </label>
+                        <p class="text-sm text-gray-600 mt-2 ml-6">Add an extra layer of security to your account</p>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="loginNotifications" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Login Notifications</span>
+                        </label>
+                        <p class="text-sm text-gray-600 mt-2 ml-6">Get notified when someone logs into your account</p>
+                    </div>
+                    
+                    <div>
+                        <label for="sessionTimeout" class="block text-sm font-medium text-gray-700 mb-2">Session Timeout</label>
+                        <select id="sessionTimeout" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                            <option value="1">1 hour</option>
+                            <option value="8">8 hours</option>
+                            <option value="24">24 hours</option>
+                            <option value="168">1 week</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-info to-cyan-600 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-white flex items-center">
+                        <i class="fas fa-palette mr-2"></i>
+                        Preferences
+                    </h2>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div>
+                        <label for="theme" class="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+                        <select id="theme" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                            <option value="auto">Auto (System)</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="language" class="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                        <select id="language" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                            <option value="en">English</option>
+                            <option value="id">Bahasa Indonesia</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="dateFormat" class="block text-sm font-medium text-gray-700 mb-2">Date Format</label>
+                        <select id="dateFormat" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="timezone" class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+                        <select id="timezone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                            <option value="UTC">UTC</option>
+                            <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
+                            <option value="America/New_York">America/New_York (EST)</option>
+                            <option value="Europe/London">Europe/London (GMT)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-white flex items-center">
+                        <i class="fas fa-bell mr-2"></i>
+                        Notifications
+                    </h2>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="uploadNotifications" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Upload Notifications</span>
+                        </label>
+                        <p class="text-sm text-gray-600 mt-2 ml-6">Get notified when uploads complete</p>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="storageNotifications" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Storage Alerts</span>
+                        </label>
+                        <p class="text-sm text-gray-600 mt-2 ml-6">Get notified when storage is nearly full</p>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="securityNotifications" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Security Alerts</span>
+                        </label>
+                        <p class="text-sm text-gray-600 mt-2 ml-6">Get notified about security events</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Actions -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="saveSettings()" class="bg-primary hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
+                        <i class="fas fa-save mr-2"></i>Save Settings
+                    </button>
+                    <button onclick="resetSettings()" class="border border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
+                        <i class="fas fa-undo mr-2"></i>Reset to Defaults
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/filemanager.js"></script>
+    <script src="/static/js/settings.js"></script>
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuButton').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // User dropdown toggle
+        document.getElementById('userMenuButton').addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userButton = document.getElementById('userMenuButton');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (!userButton.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        function logout() {
+            authManager.logout();
+        }
+    </script>
+</body>
+</html>

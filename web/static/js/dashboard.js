@@ -29,7 +29,7 @@ class Dashboard {
                 
                 // Show admin menu if user is admin
                 if (user.role === 'admin') {
-                    document.getElementById('adminMenuItem').classList.remove('d-none');
+                    document.getElementById('adminMenuItem').classList.remove('hidden');
                 }
             }
         } catch (error) {
@@ -125,9 +125,9 @@ class Dashboard {
         
         if (!files || files.length === 0) {
             container.innerHTML = `
-                <div class="text-center text-muted">
-                    <i class="fas fa-folder-open fa-2x mb-2"></i>
-                    <p>No files yet. <a href="/upload.html">Upload your first file</a></p>
+                <div class="flex flex-col items-center justify-center py-8 text-gray-500">
+                    <i class="fas fa-folder-open text-4xl mb-4"></i>
+                    <p class="text-center">No files yet. <a href="/upload.html" class="text-primary hover:text-blue-700 font-medium">Upload your first file</a></p>
                 </div>
             `;
             return;
@@ -137,24 +137,31 @@ class Dashboard {
         const recentFiles = files.slice(0, 5);
         
         container.innerHTML = recentFiles.map(file => `
-            <div class="d-flex align-items-center mb-2 p-2 border rounded">
-                <div class="me-3">
-                    <i class="${fileManager.getFileIcon(file.mime_type, file.name)}"></i>
+            <div class="flex items-center p-4 border border-gray-200 rounded-lg mb-3 hover:bg-gray-50 transition-colors">
+                <div class="flex-shrink-0 mr-4">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <i class="${fileManager.getFileIcon(file.mime_type, file.name)} text-lg"></i>
+                    </div>
                 </div>
-                <div class="flex-grow-1">
-                    <div class="fw-medium">${file.name}</div>
-                    <small class="text-muted">${fileManager.formatFileSize(file.size)} • ${fileManager.formatDate(file.modified)}</small>
+                <div class="flex-1 min-w-0">
+                    <div class="font-medium text-gray-900 truncate" title="${file.name}">${file.name}</div>
+                    <div class="text-sm text-gray-500 mt-1">
+                        ${fileManager.formatFileSize(file.size)} • ${fileManager.formatDate(file.modified)}
+                    </div>
                 </div>
-                <div class="ms-2">
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary" onclick="downloadFile('${file.id}')" title="Download">
+                <div class="flex-shrink-0 ml-4">
+                    <div class="flex space-x-2">
+                        <button onclick="downloadFile('${file.id}')" title="Download" class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-md hover:bg-blue-50">
                             <i class="fas fa-download"></i>
                         </button>
                         ${fileManager.isStreamable(file.mime_type, file.name) ? `
-                            <button class="btn btn-outline-success" onclick="streamFile('${file.id}')" title="Stream">
+                            <button onclick="streamFile('${file.id}')" title="Stream" class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-md hover:bg-green-50">
                                 <i class="fas fa-play"></i>
                             </button>
                         ` : ''}
+                        <button onclick="previewFile('${file.id}')" title="Preview" class="text-purple-600 hover:text-purple-900 transition-colors p-2 rounded-md hover:bg-purple-50">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -195,6 +202,11 @@ function downloadFile(fileId) {
 
 function streamFile(fileId) {
     window.open(`/stream.html?id=${fileId}`, '_blank');
+}
+
+function previewFile(fileId) {
+    // Redirect to files page with preview
+    window.location.href = `/files.html?preview=${fileId}`;
 }
 
 // Initialize dashboard when page loads

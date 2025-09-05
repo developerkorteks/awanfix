@@ -321,6 +321,69 @@ func (ah *AuthHandlers) ListAPIKeys(c *gin.Context) {
 	})
 }
 
+// ChangePassword changes user password
+// @Summary Change user password
+// @Description Change current user's password
+// @Tags user
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body map[string]string true "Password change request"
+// @Success 200 {object} map[string]interface{} "Password changed successfully"
+// @Failure 400 {object} map[string]interface{} "Bad request"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Router /../user/change-password [post]
+func (ah *AuthHandlers) ChangePassword(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var request struct {
+		CurrentPassword string `json:"current_password" binding:"required"`
+		NewPassword     string `json:"new_password" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+		return
+	}
+
+	// Get current user
+	var user User
+	if err := ah.dbManager.db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	// Create password manager
+	pm := NewPasswordManager()
+
+	// Verify current password
+	if err := pm.CheckPassword(request.CurrentPassword, user.Password); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Current password is incorrect"})
+		return
+	}
+
+	// Hash new password (validation is done inside HashPassword)
+	hashedPassword, err := pm.HashPassword(request.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+
+	// Update password
+	if err := ah.dbManager.db.Model(&user).Update("password", hashedPassword).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Password changed successfully",
+	})
+}
+
 // DeleteAPIKey deletes an API key
 // @Summary Delete API key
 // @Description Delete an API key by ID

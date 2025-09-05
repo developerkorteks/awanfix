@@ -362,3 +362,40 @@ body {
 .navbar-nav .nav-link:hover {
   color: var(--primary-color) !important;
 }
+
+/* Animation for image preview */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Custom scrollbar for modal content */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* File icon colors */
+.file-icon-video { color: #e74c3c; }
+.file-icon-image { color: #f39c12; }
+.file-icon-audio { color: #9b59b6; }
+.file-icon-document { color: #3498db; }
+.file-icon-archive { color: #95a5a6; }
+.file-icon-default { color: #7f8c8d; }

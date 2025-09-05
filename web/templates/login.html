@@ -4,66 +4,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - RcloneStorage</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#6b7280',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b',
+                        info: '#06b6d4'
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <div class="auth-logo">
-                    <i class="fas fa-cloud"></i>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Auth Card -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-primary to-blue-600 px-8 py-8 text-center">
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-cloud text-white text-2xl"></i>
                 </div>
-                <h2>RcloneStorage</h2>
-                <p class="text-muted">Sign in to your account</p>
+                <h1 class="text-2xl font-bold text-white mb-2">RcloneStorage</h1>
+                <p class="text-blue-100">Sign in to your account</p>
             </div>
 
-            <div id="alertContainer"></div>
+            <!-- Form Content -->
+            <div class="px-8 py-8">
+                <!-- Alert Container -->
+                <div id="alertContainer" class="mb-6"></div>
 
-            <form id="loginForm">
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" required>
-                </div>
-                
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="rememberMe">
-                    <label class="form-check-label" for="rememberMe">
-                        Remember me
-                    </label>
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-100" id="loginBtn">
-                    <span class="btn-text">Sign In</span>
-                    <span class="spinner d-none"></span>
-                </button>
-            </form>
+                <!-- Login Form -->
+                <form id="loginForm" class="space-y-6">
+                    <!-- Email Field -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-envelope mr-2 text-gray-400"></i>Email Address
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors placeholder-gray-400"
+                            placeholder="Enter your email"
+                        >
+                    </div>
+                    
+                    <!-- Password Field -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-lock mr-2 text-gray-400"></i>Password
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors placeholder-gray-400"
+                                placeholder="Enter your password"
+                            >
+                            <button 
+                                type="button" 
+                                id="togglePassword"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Remember Me -->
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center">
+                            <input 
+                                type="checkbox" 
+                                id="rememberMe"
+                                class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2"
+                            >
+                            <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                        </label>
+                        <a href="#" class="text-sm text-primary hover:text-blue-700 transition-colors">
+                            Forgot password?
+                        </a>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        id="loginBtn"
+                        class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    >
+                        <span class="btn-text">Sign In</span>
+                        <i class="fas fa-spinner fa-spin ml-2 hidden" id="loginSpinner"></i>
+                    </button>
+                </form>
 
-            <div class="text-center mt-3">
-                <p class="mb-0">Don't have an account? <a href="/register.html">Sign up</a></p>
+                <!-- Sign Up Link -->
+                <div class="mt-6 text-center">
+                    <p class="text-gray-600">
+                        Don't have an account? 
+                        <a href="/register.html" class="text-primary hover:text-blue-700 font-medium transition-colors">
+                            Sign up
+                        </a>
+                    </p>
+                </div>
+
+                <!-- Demo Credentials -->
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500 mb-2">Demo Credentials:</p>
+                        <p class="text-sm text-gray-700 font-mono">
+                            admin@rclonestorage.local / Admin123!
+                        </p>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div class="text-center mt-4">
-                <small class="text-muted">
-                    Default admin: admin@rclonestorage.local / Admin123!
-                </small>
-            </div>
+        <!-- Footer -->
+        <div class="text-center mt-8">
+            <p class="text-gray-500 text-sm">
+                © 2024 RcloneStorage. All rights reserved.
+            </p>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/auth.js"></script>
     <script>
         // Check if already logged in
         if (authManager.isAuthenticated()) {
             window.location.href = '/';
         }
+
+        // Password toggle functionality
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordField = document.getElementById('password');
+            const toggleIcon = this.querySelector('i');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
 
         // Login form handler
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -73,12 +168,12 @@
             const password = document.getElementById('password').value;
             const loginBtn = document.getElementById('loginBtn');
             const btnText = loginBtn.querySelector('.btn-text');
-            const spinner = loginBtn.querySelector('.spinner');
+            const spinner = document.getElementById('loginSpinner');
             
             // Show loading state
             loginBtn.disabled = true;
             btnText.textContent = 'Signing in...';
-            spinner.classList.remove('d-none');
+            spinner.classList.remove('hidden');
             
             try {
                 const result = await authManager.login(email, password);
@@ -97,22 +192,58 @@
                 // Reset button state
                 loginBtn.disabled = false;
                 btnText.textContent = 'Sign In';
-                spinner.classList.add('d-none');
+                spinner.classList.add('hidden');
             }
         });
 
         // Show alert function
         function showAlert(message, type) {
             const alertContainer = document.getElementById('alertContainer');
+            const alertColors = {
+                success: 'bg-green-50 border-green-200 text-green-800',
+                danger: 'bg-red-50 border-red-200 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+                info: 'bg-blue-50 border-blue-200 text-blue-800'
+            };
+            
+            const alertIcons = {
+                success: 'fas fa-check-circle',
+                danger: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
             const alert = document.createElement('div');
-            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.className = `${alertColors[type]} border rounded-lg p-4 flex items-center`;
             alert.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <i class="${alertIcons[type]} mr-3"></i>
+                <span class="flex-1">${message}</span>
+                <button type="button" class="ml-3 text-current hover:opacity-70 transition-opacity" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
             `;
+            
             alertContainer.innerHTML = '';
             alertContainer.appendChild(alert);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
         }
+
+        // Add some interactive effects
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('ring-2', 'ring-primary', 'ring-opacity-20');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('ring-2', 'ring-primary', 'ring-opacity-20');
+            });
+        });
     </script>
 </body>
 </html>

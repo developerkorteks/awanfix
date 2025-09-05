@@ -4,260 +4,394 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Files - RcloneStorage</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#6b7280',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b',
+                        info: '#06b6d4'
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
+<body class="bg-gray-50 min-h-screen">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-cloud me-2"></i>RcloneStorage
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/files.html">Files</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/upload.html">Upload</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard.html">Monitoring</a>
-                    </li>
-                </ul>
+    <nav class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-2 text-xl font-bold text-gray-900 hover:text-primary transition-colors">
+                        <i class="fas fa-cloud text-primary text-2xl"></i>
+                        <span>RcloneStorage</span>
+                    </a>
+                </div>
                 
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-1"></i>
-                            <span id="userEmail">Loading...</span>
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="/" class="text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="/files.html" class="text-primary font-medium border-b-2 border-primary pb-1 px-2">
+                        <i class="fas fa-folder mr-2"></i>Files
+                    </a>
+                    <a href="/upload.html" class="text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-upload mr-2"></i>Upload
+                    </a>
+                    <a href="/dashboard.html" class="text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-chart-line mr-2"></i>Monitoring
+                    </a>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="relative">
+                    <button id="userMenuButton" class="flex items-center space-x-2 text-gray-700 hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-user"></i>
+                        <span id="userEmail" class="hidden sm:inline">Loading...</span>
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                        <a href="/profile.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors">
+                            <i class="fas fa-user mr-2"></i>Profile
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/profile.html">Profile</a></li>
-                            <li><a class="dropdown-item" href="/settings.html">Settings</a></li>
-                            <li id="adminMenuItem" class="d-none"><a class="dropdown-item" href="/admin.html">Admin Panel</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="logout()">Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
+                        <a href="/settings.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors">
+                            <i class="fas fa-cog mr-2"></i>Settings
+                        </a>
+                        <a href="/admin.html" id="adminMenuItem" class="hidden block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors">
+                            <i class="fas fa-shield-alt mr-2"></i>Admin Panel
+                        </a>
+                        <hr class="border-gray-200">
+                        <a href="#" onclick="logout()" class="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobileMenuButton" class="text-gray-600 hover:text-primary transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <div id="mobileMenu" class="hidden md:hidden pb-4">
+                <div class="space-y-2">
+                    <a href="/" class="block text-gray-600 hover:text-primary hover:bg-gray-100 px-3 py-2 rounded-md transition-colors">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="/files.html" class="block text-primary font-medium px-3 py-2 rounded-md bg-blue-50">
+                        <i class="fas fa-folder mr-2"></i>Files
+                    </a>
+                    <a href="/upload.html" class="block text-gray-600 hover:text-primary hover:bg-gray-100 px-3 py-2 rounded-md transition-colors">
+                        <i class="fas fa-upload mr-2"></i>Upload
+                    </a>
+                    <a href="/dashboard.html" class="block text-gray-600 hover:text-primary hover:bg-gray-100 px-3 py-2 rounded-md transition-colors">
+                        <i class="fas fa-chart-line mr-2"></i>Monitoring
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <div class="container mt-4">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <h1>My Files</h1>
-                <p class="text-muted">Manage your cloud storage files</p>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">My Files</h1>
+                <p class="text-gray-600">Manage your cloud storage files</p>
             </div>
-            <div class="col-md-6 text-md-end">
-                <a href="/upload.html" class="btn btn-primary">
-                    <i class="fas fa-upload me-2"></i>Upload Files
+            <div class="flex space-x-3">
+                <a href="/upload.html" class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center">
+                    <i class="fas fa-upload mr-2"></i>Upload Files
                 </a>
-                <button class="btn btn-outline-secondary" onclick="refreshFiles()">
-                    <i class="fas fa-sync me-2"></i>Refresh
+                <button onclick="refreshFiles()" class="border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg font-medium transition-colors flex items-center">
+                    <i class="fas fa-sync mr-2"></i>Refresh
                 </button>
             </div>
         </div>
 
         <!-- Search and Filter -->
-        <div class="dashboard-card mb-4">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" class="form-control" id="searchInput" placeholder="Search files...">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
                     </div>
+                    <input type="text" id="searchInput" placeholder="Search files..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                 </div>
-                <div class="col-md-3">
-                    <select class="form-select" id="typeFilter">
-                        <option value="">All Types</option>
-                        <option value="video">Videos</option>
-                        <option value="image">Images</option>
-                        <option value="audio">Audio</option>
-                        <option value="document">Documents</option>
-                        <option value="archive">Archives</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select" id="sortBy">
-                        <option value="name">Sort by Name</option>
-                        <option value="size">Sort by Size</option>
-                        <option value="date">Sort by Date</option>
-                        <option value="type">Sort by Type</option>
-                    </select>
-                </div>
+                <select id="typeFilter" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                    <option value="">All Types</option>
+                    <option value="video">Videos</option>
+                    <option value="image">Images</option>
+                    <option value="audio">Audio</option>
+                    <option value="document">Documents</option>
+                    <option value="archive">Archives</option>
+                </select>
+                <select id="sortBy" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                    <option value="name">Sort by Name</option>
+                    <option value="size">Sort by Size</option>
+                    <option value="date">Sort by Date</option>
+                    <option value="type">Sort by Type</option>
+                </select>
             </div>
         </div>
 
         <!-- Files Statistics -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="dashboard-card stat-card">
-                    <div class="stat-icon text-primary">
-                        <i class="fas fa-file"></i>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-file text-primary text-xl"></i>
+                        </div>
                     </div>
-                    <div class="stat-value" id="totalFilesCount">0</div>
-                    <div class="stat-label">Total Files</div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Files</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalFilesCount">0</p>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="dashboard-card stat-card">
-                    <div class="stat-icon text-success">
-                        <i class="fas fa-hdd"></i>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-hdd text-success text-xl"></i>
+                        </div>
                     </div>
-                    <div class="stat-value" id="totalSizeCount">0 B</div>
-                    <div class="stat-label">Total Size</div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Size</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalSizeCount">0 B</p>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="dashboard-card stat-card">
-                    <div class="stat-icon text-info">
-                        <i class="fas fa-video"></i>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-video text-info text-xl"></i>
+                        </div>
                     </div>
-                    <div class="stat-value" id="videoFilesCount">0</div>
-                    <div class="stat-label">Videos</div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Videos</p>
+                        <p class="text-2xl font-bold text-gray-900" id="videoFilesCount">0</p>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="dashboard-card stat-card">
-                    <div class="stat-icon text-warning">
-                        <i class="fas fa-image"></i>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-image text-warning text-xl"></i>
+                        </div>
                     </div>
-                    <div class="stat-value" id="imageFilesCount">0</div>
-                    <div class="stat-label">Images</div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Images</p>
+                        <p class="text-2xl font-bold text-gray-900" id="imageFilesCount">0</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Files Table -->
-        <div class="dashboard-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">Files</h5>
-                <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-secondary active" onclick="setView('table')" id="tableViewBtn">
+        <!-- Files Container -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900">Files</h3>
+                <div class="flex space-x-2">
+                    <button onclick="setView('table')" id="tableViewBtn" class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors bg-gray-100">
                         <i class="fas fa-list"></i>
                     </button>
-                    <button class="btn btn-outline-secondary" onclick="setView('grid')" id="gridViewBtn">
+                    <button onclick="setView('grid')" id="gridViewBtn" class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
                         <i class="fas fa-th"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Loading State -->
-            <div id="loadingState" class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-3 text-muted">Loading your files...</p>
+            <div id="loadingState" class="flex flex-col items-center justify-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                <p class="text-gray-500">Loading your files...</p>
             </div>
 
             <!-- Empty State -->
-            <div id="emptyState" class="text-center py-5" style="display: none;">
-                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                <h5>No files found</h5>
-                <p class="text-muted">Upload your first file to get started</p>
-                <a href="/upload.html" class="btn btn-primary">
-                    <i class="fas fa-upload me-2"></i>Upload Files
+            <div id="emptyState" class="hidden flex flex-col items-center justify-center py-12">
+                <i class="fas fa-folder-open text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No files found</h3>
+                <p class="text-gray-500 mb-6">Upload your first file to get started</p>
+                <a href="/upload.html" class="bg-primary hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center">
+                    <i class="fas fa-upload mr-2"></i>Upload Files
                 </a>
             </div>
 
             <!-- Table View -->
-            <div id="tableView" style="display: none;">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+            <div id="tableView" class="hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th width="50">Type</th>
-                                <th>Name</th>
-                                <th width="100">Size</th>
-                                <th width="150">Modified</th>
-                                <th width="200">Actions</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Size</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Modified</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="filesTableBody">
+                        <tbody id="filesTableBody" class="bg-white divide-y divide-gray-200">
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Grid View -->
-            <div id="gridView" style="display: none;">
-                <div class="row" id="filesGridContainer">
+            <div id="gridView" class="hidden p-6">
+                <div id="filesGridContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 </div>
             </div>
 
             <!-- Pagination -->
-            <nav aria-label="Files pagination" id="paginationContainer" style="display: none;">
-                <ul class="pagination justify-content-center" id="pagination">
-                </ul>
-            </nav>
+            <div id="paginationContainer" class="hidden px-6 py-4 border-t border-gray-200">
+                <div id="pagination" class="flex justify-center">
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
     <!-- File Preview Modal -->
-    <div class="modal fade" id="previewModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="previewModalTitle">File Preview</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="previewModalBody">
-                    <!-- Preview content will be loaded here -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="downloadFromPreview">
-                        <i class="fas fa-download me-2"></i>Download
-                    </button>
-                </div>
+    <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h3 id="previewModalTitle" class="text-lg font-semibold text-gray-900">File Preview</h3>
+                <button onclick="closePreviewModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="previewModalBody" class="p-6 overflow-auto max-h-[60vh]">
+                <!-- Preview content will be loaded here -->
+            </div>
+            <div class="flex justify-end space-x-3 p-6 border-t border-gray-200">
+                <button onclick="closePreviewModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    Close
+                </button>
+                <button id="downloadFromPreview" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    <i class="fas fa-download mr-2"></i>Download
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to delete this file?</p>
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        This action cannot be undone.
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
                     </div>
-                    <div id="deleteFileInfo"></div>
+                    <h3 class="text-lg font-semibold text-gray-900">Confirm Delete</h3>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                        <i class="fas fa-trash me-2"></i>Delete File
+                <p class="text-gray-600 mb-4">Are you sure you want to delete this file?</p>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                        <span class="text-yellow-800 text-sm">This action cannot be undone.</span>
+                    </div>
+                </div>
+                <div id="deleteFileInfo" class="text-sm text-gray-600 mb-6"></div>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="closeDeleteModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center">
+                        <i class="fas fa-trash mr-2"></i>Delete File
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/auth.js"></script>
     <script src="/static/js/filemanager.js"></script>
     <script src="/static/js/files.js"></script>
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuButton').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // User dropdown toggle
+        document.getElementById('userMenuButton').addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userButton = document.getElementById('userMenuButton');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (!userButton.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Modal functions
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('previewModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closePreviewModal();
+            }
+        });
+
+        document.getElementById('deleteModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeDeleteModal();
+            }
+        });
+
+        // View toggle functions
+        function setView(viewType) {
+            const tableView = document.getElementById('tableView');
+            const gridView = document.getElementById('gridView');
+            const tableBtn = document.getElementById('tableViewBtn');
+            const gridBtn = document.getElementById('gridViewBtn');
+
+            if (viewType === 'table') {
+                tableView.classList.remove('hidden');
+                gridView.classList.add('hidden');
+                tableBtn.classList.add('bg-gray-100');
+                gridBtn.classList.remove('bg-gray-100');
+            } else {
+                tableView.classList.add('hidden');
+                gridView.classList.remove('hidden');
+                gridBtn.classList.add('bg-gray-100');
+                tableBtn.classList.remove('bg-gray-100');
+            }
+        }
+    </script>
 </body>
 </html>

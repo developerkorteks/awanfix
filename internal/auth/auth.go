@@ -55,6 +55,7 @@ func (am *AuthManager) SetupAuthRoutes(r *gin.Engine) {
 	user.Use(am.Middleware.RequireAuth())
 	{
 		user.GET("/profile", am.Handlers.GetProfile)
+		user.POST("/change-password", am.Handlers.ChangePassword)
 		user.POST("/api-keys", am.Handlers.CreateAPIKey)
 		user.GET("/api-keys", am.Handlers.ListAPIKeys)
 		user.DELETE("/api-keys/:id", am.Handlers.DeleteAPIKey)

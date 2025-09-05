@@ -4,325 +4,357 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RcloneStorage - Monitoring Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
-    <style>
-        .dashboard-card {
-            transition: transform 0.2s;
-            border: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#6b7280',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b',
+                        info: '#06b6d4'
+                    }
+                }
+            }
         }
-        .dashboard-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .metric-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .metric-label {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-        }
-        .status-online { background-color: #27ae60; }
-        .status-warning { background-color: #f39c12; }
-        .status-offline { background-color: #e74c3c; }
-        .chart-container {
-            height: 300px;
-            position: relative;
-        }
-        .provider-status {
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        .provider-online {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .provider-offline {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .refresh-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-        .auto-refresh-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-    </style>
+    </script>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-cloud"></i> RcloneStorage
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/files.html">
-                    <i class="fas fa-folder"></i> Files
-                </a>
-                <a class="nav-link" href="/upload.html">
-                    <i class="fas fa-upload"></i> Upload
-                </a>
-                <a class="nav-link" href="/profile.html">
-                    <i class="fas fa-user"></i> Profile
-                </a>
-                <a class="nav-link" href="/swagger/index.html">
-                    <i class="fas fa-book"></i> API Docs
-                </a>
-                <a class="nav-link" href="#" onclick="authManager.logout()">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-2 text-xl font-bold text-gray-900 hover:text-primary transition-colors">
+                        <i class="fas fa-cloud text-primary text-2xl"></i>
+                        <span>RcloneStorage</span>
+                    </a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="/" class="text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="/files.html" class="text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-folder mr-2"></i>Files
+                    </a>
+                    <a href="/upload.html" class="text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-upload mr-2"></i>Upload
+                    </a>
+                    <a href="/dashboard.html" class="text-primary font-medium border-b-2 border-primary pb-1 px-2">
+                        <i class="fas fa-chart-line mr-2"></i>Monitoring
+                    </a>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="relative">
+                    <button id="userMenuButton" class="flex items-center space-x-2 text-gray-700 hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-gray-100">
+                        <i class="fas fa-user"></i>
+                        <span id="userEmail" class="hidden sm:inline">Loading...</span>
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                        <a href="/profile.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors">
+                            <i class="fas fa-user mr-2"></i>Profile
+                        </a>
+                        <a href="/settings.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors">
+                            <i class="fas fa-cog mr-2"></i>Settings
+                        </a>
+                        <a href="/swagger/index.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors">
+                            <i class="fas fa-book mr-2"></i>API Docs
+                        </a>
+                        <hr class="border-gray-200">
+                        <a href="#" onclick="authManager.logout()" class="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobileMenuButton" class="text-gray-600 hover:text-primary transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <div id="mobileMenu" class="hidden md:hidden pb-4">
+                <div class="space-y-2">
+                    <a href="/" class="block text-gray-600 hover:text-primary hover:bg-gray-100 px-3 py-2 rounded-md transition-colors">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="/files.html" class="block text-gray-600 hover:text-primary hover:bg-gray-100 px-3 py-2 rounded-md transition-colors">
+                        <i class="fas fa-folder mr-2"></i>Files
+                    </a>
+                    <a href="/upload.html" class="block text-gray-600 hover:text-primary hover:bg-gray-100 px-3 py-2 rounded-md transition-colors">
+                        <i class="fas fa-upload mr-2"></i>Upload
+                    </a>
+                    <a href="/dashboard.html" class="block text-primary font-medium px-3 py-2 rounded-md bg-blue-50">
+                        <i class="fas fa-chart-line mr-2"></i>Monitoring
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid mt-4">
-        <!-- Refresh Indicator -->
-        <div class="refresh-indicator">
-            <div class="spinner-border text-primary" role="status" id="refreshSpinner" style="display: none;">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
+    <!-- Refresh Indicator -->
+    <div class="fixed top-20 right-4 z-40">
+        <div id="refreshSpinner" class="hidden animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
 
-        <!-- Auto Refresh Toggle -->
-        <div class="auto-refresh-toggle">
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
-                <label class="form-check-label" for="autoRefreshToggle">
-                    Auto Refresh
-                </label>
-            </div>
+    <!-- Auto Refresh Toggle -->
+    <div class="fixed bottom-4 right-4 z-40">
+        <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-3">
+            <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="autoRefreshToggle" checked class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2">
+                <span class="text-sm font-medium text-gray-700">Auto Refresh</span>
+            </label>
         </div>
+    </div>
 
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <h1 class="h2">
-                    <i class="fas fa-chart-line text-primary"></i>
-                    System Monitoring Dashboard
-                </h1>
-                <p class="text-muted">Real-time monitoring of RcloneStorage system</p>
-                <small class="text-muted">Last updated: <span id="lastUpdated">-</span></small>
-            </div>
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-chart-line text-primary mr-3"></i>
+                System Monitoring Dashboard
+            </h1>
+            <p class="text-gray-600 mt-2">Real-time monitoring of RcloneStorage system</p>
+            <p class="text-sm text-gray-500 mt-1">Last updated: <span id="lastUpdated">-</span></p>
         </div>
 
         <!-- System Overview Cards -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card dashboard-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-server fa-2x text-primary mb-3"></i>
-                        <div class="metric-value" id="systemUptime">-</div>
-                        <div class="metric-label">System Uptime</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-server text-primary text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">System Uptime</p>
+                        <p class="text-2xl font-bold text-gray-900" id="systemUptime">-</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card dashboard-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-files-o fa-2x text-success mb-3"></i>
-                        <div class="metric-value" id="totalFiles">-</div>
-                        <div class="metric-label">Total Files</div>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-file text-success text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Files</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalFiles">-</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card dashboard-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-hdd fa-2x text-info mb-3"></i>
-                        <div class="metric-value" id="totalStorage">-</div>
-                        <div class="metric-label">Total Storage</div>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-hdd text-info text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Storage</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalStorage">-</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card dashboard-card">
-                    <div class="card-body text-center">
-                        <i class="fas fa-users fa-2x text-warning mb-3"></i>
-                        <div class="metric-value" id="totalUsers">-</div>
-                        <div class="metric-label">Total Users</div>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-warning text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Users</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalUsers">-</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- System Information -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card dashboard-card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-info-circle"></i> System Information
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-sm">
-                            <tbody>
-                                <tr>
-                                    <td><strong>Version:</strong></td>
-                                    <td id="systemVersion">-</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Go Version:</strong></td>
-                                    <td id="goVersion">-</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>OS/Arch:</strong></td>
-                                    <td id="osArch">-</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>CPU Cores:</strong></td>
-                                    <td id="cpuCores">-</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Goroutines:</strong></td>
-                                    <td id="goroutines">-</td>
-                                </tr>
-                            </tbody>
-                        </table>
+        <!-- System Information and Providers -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- System Information -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-primary to-blue-600 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-white flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        System Information
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 font-medium">Version:</span>
+                            <span id="systemVersion" class="text-gray-900">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 font-medium">Go Version:</span>
+                            <span id="goVersion" class="text-gray-900">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 font-medium">OS/Arch:</span>
+                            <span id="osArch" class="text-gray-900">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 font-medium">CPU Cores:</span>
+                            <span id="cpuCores" class="text-gray-900">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 font-medium">Goroutines:</span>
+                            <span id="goroutines" class="text-gray-900">-</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card dashboard-card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-cloud"></i> Storage Providers
-                        </h5>
+
+            <!-- Storage Providers -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-success to-emerald-600 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-white flex items-center">
+                        <i class="fas fa-cloud mr-2"></i>
+                        Storage Providers
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div id="providersList">
+                        <div class="flex items-center justify-center py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
+                            <span class="text-gray-600">Loading...</span>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div id="providersList">
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics and Cache -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Performance Metrics -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-info to-cyan-600 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-white flex items-center">
+                        <i class="fas fa-tachometer-alt mr-2"></i>
+                        Performance Metrics
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary" id="memoryUsage">-</div>
+                            <div class="text-sm text-gray-600 mt-1">Memory Usage</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-success" id="cacheHitRate">-</div>
+                            <div class="text-sm text-gray-600 mt-1">Cache Hit Rate</div>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 pt-6">
+                        <div class="grid grid-cols-2 gap-6">
                             <div class="text-center">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
+                                <div class="text-2xl font-bold text-info" id="requestsPerSecond">-</div>
+                                <div class="text-sm text-gray-600 mt-1">Requests/sec</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-warning" id="avgResponseTime">-</div>
+                                <div class="text-sm text-gray-600 mt-1">Avg Response</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Performance Metrics -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card dashboard-card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-tachometer-alt"></i> Performance Metrics
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="text-center">
-                                    <div class="metric-value text-primary" id="memoryUsage">-</div>
-                                    <div class="metric-label">Memory Usage</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center">
-                                    <div class="metric-value text-success" id="cacheHitRate">-</div>
-                                    <div class="metric-label">Cache Hit Rate</div>
-                                </div>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="text-center">
-                                    <div class="metric-value text-info" id="requestsPerSecond">-</div>
-                                    <div class="metric-label">Requests/sec</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center">
-                                    <div class="metric-value text-warning" id="avgResponseTime">-</div>
-                                    <div class="metric-label">Avg Response</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Cache Statistics -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-white flex items-center">
+                        <i class="fas fa-database mr-2"></i>
+                        Cache Statistics
+                    </h3>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card dashboard-card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-database"></i> Cache Statistics
-                        </h5>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary" id="cacheFiles">-</div>
+                            <div class="text-sm text-gray-600 mt-1">Cached Files</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-success" id="cacheSize">-</div>
+                            <div class="text-sm text-gray-600 mt-1">Cache Size</div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="text-center">
-                                    <div class="metric-value text-primary" id="cacheFiles">-</div>
-                                    <div class="metric-label">Cached Files</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center">
-                                    <div class="metric-value text-success" id="cacheSize">-</div>
-                                    <div class="metric-label">Cache Size</div>
-                                </div>
-                            </div>
+                    <div class="border-t border-gray-200 pt-6">
+                        <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                            <div id="cacheUsageBar" class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
-                        <hr>
-                        <div class="progress mb-2">
-                            <div class="progress-bar" role="progressbar" id="cacheUsageBar" style="width: 0%"></div>
-                        </div>
-                        <small class="text-muted">Cache Usage: <span id="cacheUsagePercent">0%</span></small>
+                        <p class="text-sm text-gray-600">Cache Usage: <span id="cacheUsagePercent" class="font-medium">0%</span></p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Recent Activity -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card dashboard-card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-history"></i> Recent Activity
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="recentActivity">
-                            <div class="text-center">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4">
+                <h3 class="text-lg font-semibold text-white flex items-center">
+                    <i class="fas fa-history mr-2"></i>
+                    Recent Activity
+                </h3>
+            </div>
+            <div class="p-6">
+                <div id="recentActivity">
+                    <div class="flex items-center justify-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
+                        <span class="text-gray-600">Loading...</span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/auth.js"></script>
+    <script src="/static/js/filemanager.js"></script>
     <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuButton').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // User dropdown toggle
+        document.getElementById('userMenuButton').addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userButton = document.getElementById('userMenuButton');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (!userButton.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
         class MonitoringDashboard {
             constructor() {
                 this.autoRefresh = true;
@@ -369,6 +401,9 @@
                         console.error('Failed to load dashboard data');
                         authManager.handleApiError(response);
                     }
+
+                    // Load recent activity (files)
+                    await this.loadRecentActivity();
                 } catch (error) {
                     console.error('Error loading dashboard data:', error);
                 } finally {
@@ -376,31 +411,88 @@
                 }
             }
 
+            async loadRecentActivity() {
+                try {
+                    // Use the same method as profile page
+                    const filesData = await fileManager.getFiles();
+                    const files = filesData.files || [];
+                    // Sort by modified date (most recent first)
+                    files.sort((a, b) => new Date(b.modified) - new Date(a.modified));
+                    this.renderRecentActivity(files);
+                } catch (error) {
+                    console.error('Failed to load recent activity:', error);
+                    this.renderRecentActivity([]);
+                }
+            }
+
+            renderRecentActivity(files) {
+                const container = document.getElementById('recentActivity');
+                
+                if (!files || files.length === 0) {
+                    container.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-8 text-gray-500">
+                            <i class="fas fa-history text-4xl mb-4"></i>
+                            <p class="text-center">No recent activity</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Show only the 5 most recent files
+                const recentFiles = files.slice(0, 5);
+                
+                container.innerHTML = recentFiles.map(file => `
+                    <div class="flex items-center p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <i class="${fileManager.getFileIcon(file.mime_type, file.name)} text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-gray-900 truncate" title="${file.name}">${file.name}</div>
+                            <div class="text-sm text-gray-500 mt-1">
+                                Uploaded ${fileManager.formatDate(file.modified)} • ${fileManager.formatFileSize(file.size)}
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 ml-4">
+                            <div class="flex space-x-2">
+                                <button onclick="window.open('/stream.html?id=${file.id}', '_blank')" title="View" class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-md hover:bg-blue-50">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button onclick="window.location.href='/files.html'" title="Manage" class="text-gray-600 hover:text-gray-900 transition-colors p-2 rounded-md hover:bg-gray-50">
+                                    <i class="fas fa-cog"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
             updateDashboard(data) {
                 // Update system overview
-                document.getElementById('systemUptime').textContent = data.uptime.duration || '-';
-                document.getElementById('totalFiles').textContent = data.storage.total_files || 0;
-                document.getElementById('totalStorage').textContent = data.storage.total_size_human || '-';
-                document.getElementById('totalUsers').textContent = data.users.total_users || 0;
+                document.getElementById('systemUptime').textContent = data.uptime?.duration || '-';
+                document.getElementById('totalFiles').textContent = data.storage?.total_files || 0;
+                document.getElementById('totalStorage').textContent = data.storage?.total_size_human || '-';
+                document.getElementById('totalUsers').textContent = data.users?.total_users || 0;
 
                 // Update system information
-                document.getElementById('systemVersion').textContent = data.system.version || '-';
-                document.getElementById('goVersion').textContent = data.system.go_version || '-';
-                document.getElementById('osArch').textContent = `${data.system.os || '-'}/${data.system.arch || '-'}`;
-                document.getElementById('cpuCores').textContent = data.system.num_cpu || '-';
-                document.getElementById('goroutines').textContent = data.system.num_goroutine || '-';
+                document.getElementById('systemVersion').textContent = data.system?.version || '-';
+                document.getElementById('goVersion').textContent = data.system?.go_version || '-';
+                document.getElementById('osArch').textContent = `${data.system?.os || '-'}/${data.system?.arch || '-'}`;
+                document.getElementById('cpuCores').textContent = data.system?.num_cpu || '-';
+                document.getElementById('goroutines').textContent = data.system?.num_goroutine || '-';
 
                 // Update performance metrics
-                document.getElementById('memoryUsage').textContent = data.performance.memory_usage_human || '-';
-                document.getElementById('cacheHitRate').textContent = `${(data.performance.cache_hit_rate * 100).toFixed(1)}%` || '-';
-                document.getElementById('requestsPerSecond').textContent = data.performance.requests_per_second || '-';
-                document.getElementById('avgResponseTime').textContent = `${data.performance.avg_response_time}ms` || '-';
+                document.getElementById('memoryUsage').textContent = data.performance?.memory_usage_human || '-';
+                document.getElementById('cacheHitRate').textContent = `${((data.performance?.cache_hit_rate || 0) * 100).toFixed(1)}%`;
+                document.getElementById('requestsPerSecond').textContent = data.performance?.requests_per_second || '-';
+                document.getElementById('avgResponseTime').textContent = `${data.performance?.avg_response_time || 0}ms`;
 
                 // Update cache statistics
-                document.getElementById('cacheFiles').textContent = data.cache.total_files || 0;
-                document.getElementById('cacheSize').textContent = data.cache.total_size_human || '-';
+                document.getElementById('cacheFiles').textContent = data.cache?.total_files || 0;
+                document.getElementById('cacheSize').textContent = data.cache?.total_size_human || '-';
                 
-                const cacheUsagePercent = ((data.cache.total_size || 0) / (data.cache.max_size || 1)) * 100;
+                const cacheUsagePercent = ((data.cache?.total_size || 0) / (data.cache?.max_size || 1)) * 100;
                 document.getElementById('cacheUsagePercent').textContent = `${cacheUsagePercent.toFixed(1)}%`;
                 document.getElementById('cacheUsageBar').style.width = `${cacheUsagePercent}%`;
 
@@ -412,23 +504,32 @@
                 const providersList = document.getElementById('providersList');
                 
                 if (!providers || providers.length === 0) {
-                    providersList.innerHTML = '<p class="text-muted">No providers configured</p>';
+                    providersList.innerHTML = '<p class="text-gray-500">No providers configured</p>';
                     return;
                 }
 
                 let html = '';
                 providers.forEach(provider => {
-                    const statusClass = provider.status === 'online' ? 'provider-online' : 'provider-offline';
-                    const iconClass = provider.status === 'online' ? 'fas fa-check-circle text-success' : 'fas fa-times-circle text-danger';
+                    const isOnline = provider.status === 'online';
+                    const statusBadge = isOnline 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800';
+                    const statusIcon = isOnline 
+                        ? 'fas fa-check-circle text-green-500' 
+                        : 'fas fa-times-circle text-red-500';
                     
                     html += `
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                <i class="${iconClass}"></i>
-                                <strong>${provider.name}</strong>
-                                <small class="text-muted">(${provider.type})</small>
+                        <div class="flex justify-between items-center py-3 border-b border-gray-200 last:border-b-0">
+                            <div class="flex items-center">
+                                <i class="${statusIcon} mr-3"></i>
+                                <div>
+                                    <div class="font-medium text-gray-900">${provider.name}</div>
+                                    <div class="text-sm text-gray-500">${provider.type}</div>
+                                </div>
                             </div>
-                            <span class="provider-status ${statusClass}">${provider.status}</span>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusBadge}">
+                                ${provider.status}
+                            </span>
                         </div>
                     `;
                 });
@@ -441,11 +542,11 @@
             }
 
             showRefreshIndicator() {
-                document.getElementById('refreshSpinner').style.display = 'block';
+                document.getElementById('refreshSpinner').classList.remove('hidden');
             }
 
             hideRefreshIndicator() {
-                document.getElementById('refreshSpinner').style.display = 'none';
+                document.getElementById('refreshSpinner').classList.add('hidden');
             }
 
             startAutoRefresh() {
